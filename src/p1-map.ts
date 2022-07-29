@@ -85,7 +85,7 @@ export default class P1Map {
     { id: '0-0:96.7.21', name: 'powerFailures', valueRetriever: P1Map.parseFirstInt },
     { id: '0-0:96.7.9', name: 'longPowerFailures', valueRetriever: P1Map.parseFirstInt },
     { id: '0-1:24.1.0', name: 'xDeviceType', valueRetriever: P1Map.getFirstString }, // XMX5
-//  { id: '0-1:24.2.1', name: 'xGas', valueRetriever: P1Map.parseGasValue }, // XMX5
+    // { id: '0-1:24.2.1', name: 'xGas', valueRetriever: P1Map.parseGasValue }, // XMX5
     { id: '0-1:24.2.3', name: 'xGas', valueRetriever: P1Map.parseGasValue }, // https://github.com/svrooij/smartmeter2mqtt/issues/36
     { id: '0-1:96.1.0', name: 'xGasSn', valueRetriever: P1Map.getFirstString }, // XMX5
     { id: '0-2:24.1.0', name: 'deviceType', valueRetriever: P1Map.getFirstString },

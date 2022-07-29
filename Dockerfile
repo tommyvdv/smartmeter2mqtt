@@ -1,9 +1,9 @@
-FROM node:current-alpine as node-original
+FROM node:alpine as node-original
 FROM node-original as install
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN apk update &&\
-  apk add --no-cache make gcc g++ python linux-headers udev
+  apk add --no-cache make gcc g++ python3 linux-headers udev
 RUN npm ci --only=production
 
 FROM install as compile

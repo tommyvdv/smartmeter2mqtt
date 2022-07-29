@@ -7,9 +7,11 @@ on:
   push:
     branches:
       - master
-      - development
-      - beta
   pull_request:
+
+env:
+  REGISTRY: ${{ secrets.DOCKERHUB_REGISTRYNAME }}
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   run-tests-node-12:
@@ -23,16 +25,6 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
-      - name: Send data to Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v2
-        id: semantic
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Enable docker buildx
         id: buildx
         if: steps.semantic.outputs.new_release_published == 'true'
@@ -43,28 +35,14 @@ jobs:
           qemu-version: latest
       - name: Login to docker
         if: steps.semantic.outputs.new_release_published == 'true'
-        run:
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Publish to docker with buildx as latest
         if: steps.semantic.outputs.new_release_published == 'true' && github.ref == 'refs/heads/master'
         run: |
           docker buildx build \
             --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 \
             --push \
-            -t svrooij/smartmeter:latest \
-            -t svrooij/smartmeter:${{ steps.semantic.outputs.new_release_version }} \
-            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-            --build-arg BUILD_VERSION=${{ steps.semantic.outputs.new_release_version }} \
-            --build-arg VSC_REF=$(echo ${GITHUB_SHA} | cut -c1-8) \
-            .
-      - name: Publish to docker with buildx as beta
-        if: steps.semantic.outputs.new_release_published == 'true' && github.ref != 'refs/heads/master'
-        run: |
-          docker buildx build \
-            --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 \
-            --push \
-            -t svrooij/smartmeter:beta \
-            -t svrooij/smartmeter:${{ steps.semantic.outputs.new_release_version }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
             --build-arg BUILD_VERSION=${{ steps.semantic.outputs.new_release_version }} \
             --build-arg VSC_REF=$(echo ${GITHUB_SHA} | cut -c1-8) \
